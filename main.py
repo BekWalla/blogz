@@ -19,9 +19,9 @@ class BlogHandler(webapp2.RequestHandler):
             Get all posts by a specific user, ordered by creation date (descending).
             The user parameter will be a User object.
         """
+        posts_by_user = Post.all().filter('author =', user).order('-created')
+        return posts_by_user.fetch(limit=limit, offset=offset)
 
-        # TODO - filter the query so that only posts by the given user
-        return None
 
     def get_user_by_name(self, username):
         """ Get a user object from the db, based on their username """
@@ -144,7 +144,7 @@ class NewPostHandler(BlogHandler):
             id = post.key().id()
             self.redirect("/blog/%s" % id)
         else:
-            error = "we need both a title and a body!"
+            error = "Please put in a title and a post!"
             self.render_form(title, body, error)
 
 class ViewPostHandler(BlogHandler):
@@ -157,7 +157,7 @@ class ViewPostHandler(BlogHandler):
             t = jinja_env.get_template("post.html")
             response = t.render(post=post)
         else:
-            error = "there is no post with id %s" % id
+            error = "There is no post with id %s" % id
             t = jinja_env.get_template("404.html")
             response = t.render(error=error)
 
@@ -223,7 +223,7 @@ class SignupHandler(BlogHandler):
         has_error = False
 
         if existing_user:
-            errors['username_error'] = "A user with that username already exists"
+            errors['username_error'] = "A user with that username already exists."
             has_error = True
         elif (username and password and verify and (email is not None) ):
 
